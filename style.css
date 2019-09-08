@@ -1,0 +1,132 @@
+.logo {
+	font-family: 'Josefin Sans', sans-serif;
+	font-size: 30px;
+}
+
+.navbar-brand {
+	color: #5035f5;
+}
+
+.nav-links {
+	color: #5035f5;
+	margin-right: 10px;
+	font-weight: bold;
+}
+
+.nav-links:hover {
+	text-decoration: none;
+}
+
+.graphs {
+	display:flex;
+     flex-wrap: wrap;
+}
+
+.graph1 {
+	width: 600px;
+	margin-left: 100px;
+}
+.graph2 {
+	width: 600px;
+	margin-left: 40px;
+}
+
+.account-logout {
+  width: 35px;
+  height: 35px;
+  font-size: 14px;
+  line-height: 1.33;
+  border-radius: 25px;
+  border: 2px solid #5035f5;
+  font-family: sans-serif;
+  color: #5035f5;
+  border-image: 2px solid black;
+}
+
+.section-names {
+	color: #5035f5;
+	font-size: 25px;
+	margin-top: 70px;
+	margin-left: 20px;
+	margin-bottom: 50px;
+}
+
+.section-names2 {
+	color: #FFFFFF;
+	font-size: 25px;
+	padding-top: 40px;
+	margin-top: 120px;
+	margin-left: 20px;
+	margin-bottom: 50px;
+}
+
+.canvas-center {
+	/*temporary fix*/
+	margin-left: 100px;
+}
+
+.canvas-one {
+	
+}
+
+.optimization {
+	background-color: #5035f5;
+}
+
+.find-more {
+	text-align: center;
+}
+
+.spacer {
+	padding-bottom: 40px;
+}
+
+
+
+/*Home view css*/
+.company-description {
+	color: #32325a;
+	font-size: 16px;
+	margin-top: 30px;
+}
+
+.company-moto {
+	color: #32325a;
+	font-size: 28px;
+}
+
+.intro {
+	font-family: "Roboto";
+}
+
+.mockup {
+	height: 400px;
+}
+
+.inner-table {
+	display:table;
+	margin-top: 80px;
+}
+
+.intro-text {
+	display:table-cell;
+	padding-left:70px;
+}
+
+.col-md-4 {
+	text-align: center;
+}
+
+.features {
+	background-color: #5035f5;
+	color: white;
+}
+
+.feature-category {
+	font-size: 25px;
+}
+
+.fas {
+	font-size: 50px;
+	margin-bottom: 20px;
+}

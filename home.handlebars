@@ -1,0 +1,410 @@
+<nav class="navbar navbar-expand-lg navbar-light">
+  <a class="navbar-brand logo" style="color: #5035f5" href="#">Electro</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+    	<a href="" class="nav-links">Pay my bill</a>
+    	<a href="http://localhost:3000/" class="nav-links">Log out</a>
+      <img src="https://pixel.nymag.com/imgs/daily/vulture/2017/05/30/30-5-tjmiller.w700.h700.jpg" class="account-logout">
+    </form>
+  </div>
+</nav>
+
+<h1 class="section-names">My Dashboard</h1>
+
+
+<!-- <div class="canvas-center">
+	<div class="row">
+    <div class="col-sm-5"> -->
+    	<div class="graphs">
+    <div class="graph1">
+	<canvas id="xCostPerSec"></canvas>
+</div>
+<!-- </div> -->
+	<!-- <div class="col-sm-5"> -->
+		<div class="graph2">
+	<canvas id="yCostPerSec"></canvas>
+</div>
+</div>
+<!-- </div>
+</div>
+</div> -->
+
+<script type="text/javascript">
+	var ser_global = 0;
+	var rate_global = 0;
+	// var balance_owed = 0;
+	// var last_read_index = 0;
+
+	// Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyBSfIjgJZdX-LzHTg4DOalMoKtIMar323k",
+    authDomain: "electro-68c1a.firebaseapp.com",
+    databaseURL: "https://electro-68c1a.firebaseio.com",
+    projectId: "electro-68c1a",
+    storageBucket: "",
+    messagingSenderId: "499502809317",
+    appId: "1:499502809317:web:7d9d2a17d73f486694d40c"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
+  database = firebase.database();
+
+  var ref = database.ref('Electro');
+  ref.on('value', gotData, errData);
+
+function gotData(data) {
+	var dataPoints = data.val()
+  	//console.log(dataPoints)
+  	// Get an array of all keys
+  	var keys = Object.keys(dataPoints)
+  	// console.log(keys)
+  	// for (var i = 0; i < keys.length; i++) {
+  	// 	var k = keys[i]
+  	// 	var datetime_object = dataPoints[k].datetime_object;
+  	// 	var ser = dataPoints[k].ser;
+  	// 	var rate = dataPoints[k].rate;
+  	// 	console.log(datetime_object, ser, rate)
+  	// }
+  	var last_index = keys.length-1;
+  	var ser = dataPoints[keys[keys.length-1]].ser;		// kwh used
+  	var rate = dataPoints[keys[keys.length-1]].rate;	// $ per kwh (in real time)
+  	console.log("usage (kwh): " + ser);
+  	console.log("--> " + typeof(ser));
+  	console.log("rate ($/kwh): " + rate);
+  	console.log("--> " + typeof(rate));
+  	ser_global = ser;
+  	rate_global = rate;
+
+  	// change_in_balance = get_new_balance(dataPoints, keys);
+  	// balance_owed += change_in_balance;
+
+  	last_read_index = last_index;
+
+  	// console.log("change in balance:");
+  	// console.log(balance_owed);
+  	// console.log("new balance:");
+  	// console.log(balance_owed)
+
+  }
+  //calculates dollar amount owed since last checked
+  // function get_new_balance(dataPoints, keys) {
+  // 	var new_key_indeces = keys.slice(last_read_index+1, keys.length);
+  // 	var new_sum = 0;
+  // 	new_key_indeces.forEach(funtion(index) {
+  // 		new_sum += (dataPoints[keys[index]].ser * dataPoints[keys[index]].rate);
+  // 	});
+  // 	return new_sum;
+  // }
+
+  function errData(err) {
+  	console.log(err)
+
+  }
+
+</script>
+
+
+<script>
+	window.onload = function() {
+		console.log("LOADED");
+
+		//Configuration variable
+		var updateInterval = 6550 //in ms
+  		var numberElements = 10;
+
+  		//Globals
+  		var updateCount = 0;
+
+  		// Chart Objects
+  		var xCostPerSec = $("#xCostPerSec");
+  		//chart instances & configuration
+
+
+	var chartOptions = {
+		scales: {
+			xAxes: [{
+				type: 'time',
+				time: {
+					displayFormats: {
+						second: 'h:mm:ss a'
+					}
+				},
+				gridLines: {
+                color: "rgba(0, 0, 0, 0)",
+            }
+        }],
+  			yAxes: [{
+            	ticks: {
+                	beginAtZero:true
+                },
+                gridLines: {
+                color: "rgba(0, 0, 0, 0)",
+            }
+            }]
+        },
+        legend: {display: false},
+        tooltips:{
+        	enabled: true
+        }
+    };
+
+    // chart creation
+    var xCostPerSecInstance = new Chart(xCostPerSec, {
+    	type: 'line',
+    	data: {
+    		datasets: [{
+    			label: "Cost Per Second ($)",
+    			data: [0.0, .30,.40],
+            	fill: false,
+            	borderColor: 'rgba(80, 53, 245, 1)',
+            	borderWidth: 1
+            }]
+        },
+        options: Object.assign({}, chartOptions, {
+        	title:{
+          		display: true,
+          		text: "Consumed energy per hour (kWh)",
+          		fontSize: 18,
+          		fontColor: "black"
+          	}
+          })
+    });
+
+  // real-time updating done here
+  function updateData() {
+    console.log("Update Data");
+    // replace .php with jSON file
+    // $.getJSON("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=5min&apikey=742KAKC5YI3C9XPO", addData);
+    //num = getRand(0.5, 2.5);
+    num = ser_global;
+    console.log("**** num = " + num);
+    console.log(ser_global)
+    addData(num)
+    setTimeout(updateData,updateInterval);
+  };
+
+  function addData(data) {
+    // safety check to make sure data exists
+    if(data){
+      // update the date and data
+      xCostPerSecInstance.data.labels.push(new Date());
+      xCostPerSecInstance.data.datasets.forEach((dataset) =>{dataset.data.push(data)});
+      // if necessary, remove old data from chart
+      if(updateCount > numberElements){
+        xCostPerSecInstance.data.labels.shift();
+        xCostPerSecInstance.data.datasets[0].data.shift();
+      }
+      else updateCount++;
+      // update the chart with the new data
+      xCostPerSecInstance.update();
+    }
+  };
+
+  function getRand(min, max) {
+    return min + Math.abs((max-min)*Math.random());
+  }
+
+  updateData();
+}
+</script>
+
+
+<!-- Price graph -->
+<script>
+
+		//Configuration variable
+		var updateInterval = 6550 //in ms
+  		var numberElements = 10;
+
+  		//Globals
+  		var updateCount = 0;
+
+  		// Chart Objects
+  		var xCostPerSec = $("#yCostPerSec");
+  		//chart instances & configuration
+
+
+	var chartOptions = {
+		scales: {
+			xAxes: [{
+				type: 'time',
+				time: {
+					displayFormats: {
+						second: 'h:mm:ss a'
+					}
+				},
+				gridLines: {
+                color: "rgba(0, 0, 0, 0)",
+            }
+        }],
+  			yAxes: [{
+            	ticks: {
+                	beginAtZero:true
+                },
+                gridLines: {
+                color: "rgba(0, 0, 0, 0)",
+            }
+            }]
+        },
+        legend: {display: false},
+        tooltips:{
+        	enabled: true
+        }
+    };
+
+    // chart creation
+    var xCostPerSecInstance = new Chart(xCostPerSec, {
+    	type: 'line',
+    	data: {
+    		datasets: [{
+    			label: "Price Per Second ($)",
+    			data: [0.0, .30,.40],
+            	fill: false,
+            	borderColor: 'rgba(80, 53, 245, 1)',
+            	borderWidth: 1
+            }]
+        },
+        options: Object.assign({}, chartOptions, {
+        	title:{
+          		display: true,
+          		text: "Energy purchased per hour ($)",
+          		fontSize: 18,
+          		fontColor: "black"
+          	}
+          })
+    });
+
+  // real-time updating done here
+  function updateData() {
+    console.log("Update Data");
+    // replace .php with jSON file
+    // $.getJSON("https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=5min&apikey=742KAKC5YI3C9XPO", addData);
+    //num = getRand(0.5, 2.5);
+    num = ser_global*rate_global;    // Dollars
+    console.log("**** num = " + num);
+    console.log(ser_global)
+    addData(num)
+    setTimeout(updateData,updateInterval);
+  }
+
+  function addData(data) {
+    // safety check to make sure data exists
+    if(data){
+      // update the date and data
+      xCostPerSecInstance.data.labels.push(new Date());
+      xCostPerSecInstance.data.datasets.forEach((dataset) =>{dataset.data.push(data)});
+      // if necessary, remove old data from chart
+      if(updateCount > numberElements){
+        xCostPerSecInstance.data.labels.shift();
+        xCostPerSecInstance.data.datasets[0].data.shift();
+      }
+      else updateCount++;
+      // update the chart with the new data
+      xCostPerSecInstance.update();
+    }
+  };
+
+  function getRand(min, max) {
+    return min + Math.abs((max-min)*Math.random());
+  }
+
+  updateData();
+
+</script>
+
+
+
+
+<div class="optimization">
+	<h1 class="section-names2">Energy Usage Optimization</h1>
+	<div class="container">
+	<canvas id="myLineChart2"></canvas>
+	<div class="find-more">
+	<button type="button" class="btn btn-outline-light" style="margin-top: 60px; margin-bottom: 40px;">Show me how!</button>
+</div>
+<div class="spacer"></div>
+</div>
+</div>
+
+
+
+<script>
+	let myLineChart2 = document.getElementById('myLineChart2').getContext('2d');
+
+		let massPopChart3 = new Chart(myLineChart2, {
+				type:'line',
+				data: {
+					labels: ["12am", "1am", "2am", "3am"],
+					datasets: [{
+						label: 'Energy consumption per hour',
+						// Data before ML
+						label: "Before",
+						data: [.10,.23,.10,.55],
+						fill: false,
+				        borderColor: "rgba(153, 153, 153, 1)"
+				    },
+
+				    {
+				    	// Data after ML
+				    	label: "After",
+				    	data: [0.09, 0.10, 0.05, 0.28],
+				    	fill: false,	
+				        borderColor: "rgba(255, 255, 255, 1)"
+				    },]
+		      	}, 
+
+			    options:{
+			      	scales: {
+				        xAxes: [{
+				            gridLines: {
+				                color: "rgba(0, 0, 0, 0)",
+				                zeroLineColor: '#ffffff'
+				            },
+				            ticks: {
+			                    fontColor: "white",
+			                    fontSize: 15,
+			                }
+				        }],
+				        yAxes: [{
+				            gridLines: {
+				                color: "rgba(0, 0, 0, 0)",
+				                zeroLineColor: '#ffffff'
+				            },
+				            ticks: {
+			                    fontColor: "white",
+			                    fontSize: 15,
+			                }   
+				        }]
+			    	},
+			        legend:{ display:false},
+			        layout:{
+			          padding:{
+			            left:50,
+			            right:0,
+			            bottom:0,
+			            top:0
+			          }
+			        },
+			        tooltips:{
+			          enabled:true
+			        }
+			    }
+		});
+</script>
+
+
+<div>
+	<h1 class="section-names">Bill breakdown</h1>
+</div>
+
+
+
+
+
